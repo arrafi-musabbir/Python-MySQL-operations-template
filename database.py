@@ -120,3 +120,4 @@ if __name__ == "__main__":
     a.describeTable("CHECK_IN_OUT_records")
     a.addNew("CHECK_IN_OUT_records", randint(1, 100), randint(101, 200), randint(201, 300),)
     a.disconnect()
+    ## just some commmit

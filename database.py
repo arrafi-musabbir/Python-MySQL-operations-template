@@ -17,6 +17,7 @@ class database:
         self.mycursor = None
         self.totalIDs = None
         self.internetConnectivity = self.checkInternetSocket()
+        self.connectDB()
 
         
     # establish connection to database
@@ -93,7 +94,6 @@ class database:
             self.mycursor.execute("SELECT * FROM deviceid")
             num_rows = self.mycursor.fetchall()
             return len(num_rows)
-
         except:
             print("database connection failed")
             return False

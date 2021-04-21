@@ -8,15 +8,15 @@ from random import randint
 class database:
 
     def __init__(self, host, port, user, password, schema):
+        self.internetConnectivity = self.checkInternetSocket()
         self.host = host
         self.port = port
         self.user = user
         self.password = password
         self.database = schema
-        self.db_state = 0
+        self.db_connection = False
         self.mycursor = None
         self.totalIDs = None
-        self.internetConnectivity = self.checkInternetSocket()
         self.connectDB()
 
         
@@ -29,13 +29,13 @@ class database:
                 user = self.user,
                 password = self.password,
                 database = self.database)
-            self.db_state = 1
+            self.db_connection = True
             self.mycursor = self.myDB.cursor()
             print("Server connection established successfully")
         except mysql.connector.Error:
-            self.db_state = 0
+            self.db_connection = False
             print("Server connection failed")
-        return self.db_state
+        return self.db_connection
 
     
     # add new entries
@@ -106,7 +106,6 @@ class database:
             print("stable internet connection")
             return True
         except socket.error:
-            # print(ex)
             print("unstable internet connection restored")
             return False
     
@@ -116,7 +115,7 @@ if __name__ == "__main__":
                 user ="ui3kv2obppaytcrg",
                 password ="1G4NcaXyBPpAWuGrx5Mg",
                 schema ="bqgm0itmhmekra8ftfqb" )
-    a.connectDB()
+    print(a.connectDB())
     a.describeTable("CHECK_IN_OUT_records")
     a.addNew("CHECK_IN_OUT_records", randint(1, 100), randint(101, 200), randint(201, 300),)
     a.disconnect()

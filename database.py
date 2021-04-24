@@ -116,7 +116,7 @@ if __name__ == "__main__":
                 password ="#456",
                 schema ="deviceinfo" )
     print(a.connectDB())
-    a.describeTable("CHECK_IN_OUT_records")
-    a.addNew("CHECK_IN_OUT_records", randint(1, 100), randint(101, 200), randint(201, 300),)
+    a.describeTable("deviceid")
+    # a.addNew("CHECK_IN_OUT_records", randint(1, 100), randint(101, 200), randint(201, 300),)
     a.disconnect()
     ## just some commmit

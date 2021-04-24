@@ -35,7 +35,7 @@ class database:
         except mysql.connector.Error:
             self.db_connection = False
             print("Server connection failed")
-        return self.db_connection
+        return self.db_connection 
 
     
     # add new entries
@@ -110,11 +110,11 @@ class database:
             return False
     
 if __name__ == "__main__":
-    a = database(host ="bqgm0itmhmekra8ftfqb-mysql.services.clever-cloud.com",
+    a = database(host ="localhost",
                 port = "3306",
-                user ="ui3kv2obppaytcrg",
-                password ="1G4NcaXyBPpAWuGrx5Mg",
-                schema ="bqgm0itmhmekra8ftfqb" )
+                user ="root",
+                password ="#456",
+                schema ="deviceinfo" )
     print(a.connectDB())
     a.describeTable("CHECK_IN_OUT_records")
     a.addNew("CHECK_IN_OUT_records", randint(1, 100), randint(101, 200), randint(201, 300),)

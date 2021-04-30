@@ -1,0 +1,6 @@
+DB_HOST: 'localhost'
+DB_NAME: 'deviceinfo'
+DB_PORT: 3306
+DB_PSWD: '#456'
+DB_UNAME: 'root'
+DB_TABLE: 'deviceid'

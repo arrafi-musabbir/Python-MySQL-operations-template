@@ -1,2 +1,7 @@
 .vscode/
-
+Lib/
+Scripts/
+Include/
+pyvenv.cfg
+/*.pyc
+remote_

@@ -4,6 +4,7 @@ from datetime import datetime
 import socket
 from sshtunnel import SSHTunnelForwarder
 import yaml
+import os
 
 class database:
 
@@ -16,7 +17,6 @@ class database:
         self.connectDB()
 
     # establish connection to database
-
     def connectDB(self):
         self.retrieveCreds()
         if self.server == 'remote':
@@ -48,7 +48,7 @@ class database:
                         user=self.serverINFO['DB_UNAME'],
                         password=self.serverINFO['DB_PSWD'],
                         database=self.serverINFO['DB_NAME'])
-                self.table_name = 'deviceid'
+                self.table_name = self.serverINFO['DB_TABLE']
                 self.db_state = 1
                 self.mycursor = self.myDB.cursor()
                 print("Server connection established successfully")
@@ -62,12 +62,12 @@ class database:
     def retrieveCreds(self):
         self.serverINFO = dict()
         if self.server == 'local':
-            with open('local_creds.yaml', 'r') as file:
+            with open(os.path.join(os.getcwd(),'local_creds.yaml'), 'r') as file:
                     serverINFO = yaml.safe_load(file)
                     for i in serverINFO:
                         self.serverINFO[i] = serverINFO[i]
         elif self.server == 'remote' :
-            with open('remote_creds.yaml', 'r') as file:
+            with open(os.path.join(os.getcwd(),'remote_creds.yaml'), 'r') as file:
                     serverINFO = yaml.safe_load(file)
                     for i in serverINFO:
                         self.serverINFO[i] = serverINFO[i]
@@ -86,9 +86,8 @@ class database:
             return False
 
     # describe the table
-
-    def describeTable(self, tableName):
-        self.mycursor.execute("DESCRIBE {}".format(tableName))
+    def describeTable(self):
+        self.mycursor.execute("DESCRIBE {}".format(self.table_name))
         for x in self.mycursor:
             print(x)
 
@@ -106,7 +105,6 @@ class database:
         print("The table has been cleared")
 
     # clear n number of entries from said table
-
     def clearEntries(self, n):
         if self.myDB:
             try:
@@ -121,14 +119,14 @@ class database:
         else:
             print("database didn't respond")
 
-    # get total number of entries/ID
+    # get total number of entries/rows in a table
     def getTotalID(self):
         try:
             # self.mycursor.execute(
             #     "SELECT Serial FROM deviceid ORDER BY CreatedOn DESC LIMIT 1")
             self.mycursor.execute("SELECT * FROM deviceid")
-            num_rows = self.mycursor.fetchall()
-            return len(num_rows)
+            self.mycursor.fetchall()
+            return len(self.mycursor.fetchall())
         except:
             print("database connection failed")
             return False
@@ -149,7 +147,7 @@ class database:
 if __name__ == "__main__":
     # initiate class instance bt providing either local / remote
     a = database('local')
-    # a.describeTable(tableName="deviceid")
+    a.describeTable()
     # a.addNew("CHECK_IN_OUT_records", randint(1, 100), randint(101, 200), randint(201, 300),)
     a.disconnect()
     # just some commmit

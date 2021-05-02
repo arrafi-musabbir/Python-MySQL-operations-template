@@ -1,22 +1,36 @@
 from sshtunnel import SSHTunnelForwarder
 import mysql.connector
-print(len("2021-04-28 12:46:19.520502"))
+from passwordmanager import PasswordManager
 
-SSH_HOST = '103.123.8.52'
-SSH_PSWD = 'Dhaka!027'
-SSH_UNAME = 'papel'
-SSH_PORT = 22
-DB_USER = 'root'
-DB_HOST = '127.0.0.1'
-DB_PORT = 3306
-DB_NAME1 = 'arrafi_pg'
-TABLE_NAME1 = 'init_devices'
-DB_NAME2 = 'wasa_amr'
-TABLE_NAME2 = 'amr_dashboard_device_info'
+class UpdateTableEntries:
 
+	def __init__(self, passphrase):
+		self.server_connection = False
+		self.serverINFO = PasswordManager(passphrase).retrieveServerCredentials()
 
-tunnel=SSHTunnelForwarder((SSH_HOST, SSH_PORT), ssh_password = SSH_PSWD, ssh_username = SSH_UNAME, remote_bind_address = (DB_HOST, DB_PORT))
-tunnel.start()
+	def establishServerConnection(self):
+		try:
+			self.tunnel = SSHTunnelForwarder((self.serverINFO['SSH_HOST'], int(self.serverINFO['SSH_PORT'])), 
+										ssh_password=self.serverINFO['SSH_PSWD'], 
+										ssh_username=self.serverINFO['SSH_UNAME'], 
+										remote_bind_address=(self.serverINFO['DB_HOST'], int(self.serverINFO['DB_PORT']))) 
+			self.tunnel.start()
+			self.myDB = mysql.connector.connect(
+				host=self.serverINFO['DB_HOST'],
+				port=self.tunnel.local_bind_port,
+				user=self.serverINFO['DB_UNAME'],
+				password=self.serverINFO['DB_PSWD'])
+			self.table_name = self.serverINFO['DB_TABLE']
+			self.mycursor = self.myDB.cursor()
+			self.server_connection = True
+			print("Remote server connection established successfully")
+			return self.db_connection
+		except mysql.connector.errors.InterfaceError:
+			print("Server connection failed")
+			return False
+
+	def 
+
 
 conn1 = mysql.connector.connect(host=DB_HOST, user=DB_USER , passwd = SSH_PSWD, port=tunnel.local_bind_port, database=DB_NAME1)
 cur1 = conn1.cursor()

@@ -4,4 +4,3 @@ Scripts/
 Include/
 pyvenv.cfg
 /*.pyc
-creds.yml

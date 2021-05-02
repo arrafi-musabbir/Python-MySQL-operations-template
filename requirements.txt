@@ -1,5 +1,12 @@
-mysql==0.0.2
+bcrypt==3.2.0
+cffi==1.14.5
+cryptography==3.4.7
 mysql-connector-python==8.0.24
-mysqlclient==2.0.3
+paramiko==2.7.2
 protobuf==3.15.8
+pycparser==2.20
+PyNaCl==1.4.0
+PyYAML==5.4.1
 six==1.15.0
+sshtunnel==0.4.0
+yml==0.0.1

@@ -5,38 +5,44 @@ import socket
 from sshtunnel import SSHTunnelForwarder
 import yaml
 import os
+from PasswordManager import PasswordManager
+
 
 class database:
 
-    def __init__(self, server):
+    def __init__(self, server, passphrase, db_name, table_name):
         self.internetConnectivity = self.checkInternetSocket()
         self.db_connection = False
         self.mycursor = None
         self.totalIDs = None
         self.server = server
+        self.serverINFO = PasswordManager(
+            passphrase).retrieveServerCredentials()
+        self.db_name = db_name
+        self.table_name = table_name
         self.connectDB()
 
     # establish connection to database
     def connectDB(self):
-        self.retrieveCreds()
         if self.server == 'remote':
             try:
-                self.tunnel = SSHTunnelForwarder((self.serverINFO['SSH_HOST'], int(self.serverINFO['SSH_PORT'])), 
-                                            ssh_password=self.serverINFO['SSH_PSWD'], 
-                                            ssh_username=self.serverINFO['SSH_UNAME'], 
-                                            remote_bind_address=(self.serverINFO['DB_HOST'], int(self.serverINFO['DB_PORT']))) 
+                print(self.serverINFO)
+                self.tunnel = SSHTunnelForwarder((self.serverINFO['SSH_HOST'], int(self.serverINFO['SSH_PORT'])),
+                                                 ssh_password=self.serverINFO['SSH_PSWD'],
+                                                 ssh_username=self.serverINFO['SSH_USER'],
+                                                 remote_bind_address=(self.serverINFO['DB_HOST'], int(self.serverINFO['DB_PORT'])))
                 self.tunnel.start()
                 self.myDB = mysql.connector.connect(
                     host=self.serverINFO['DB_HOST'],
                     port=self.tunnel.local_bind_port,
-                    user=self.serverINFO['DB_UNAME'],
+                    user=self.serverINFO['DB_USER'],
                     password=self.serverINFO['DB_PSWD'],
-                    database=self.serverINFO['DB_NAME'])
-                self.table_name = self.serverINFO['DB_TABLE']
+                    database= self.db_name)
                 self.db_state = 1
                 self.mycursor = self.myDB.cursor()
                 self.db_connection = True
                 print("Remote server connection established successfully")
+                self.myDB.rollback()
             except mysql.connector.errors.InterfaceError:
                 self.db_state = 0
                 print("Server connection failed")
@@ -44,11 +50,11 @@ class database:
         elif self.server == 'local':
             try:
                 self.myDB = mysql.connector.connect(
-                        host=self.serverINFO['DB_HOST'],
-                        port=self.serverINFO['DB_PORT'],
-                        user=self.serverINFO['DB_UNAME'],
-                        password=self.serverINFO['DB_PSWD'],
-                        database=self.serverINFO['DB_NAME'])
+                    host=self.serverINFO['DB_HOST'],
+                    port=self.serverINFO['DB_PORT'],
+                    user=self.serverINFO['DB_UNAME'],
+                    password=self.serverINFO['DB_PSWD'],
+                    database=self.serverINFO['DB_NAME'])
                 self.table_name = self.serverINFO['DB_TABLE']
                 self.db_state = 1
                 self.mycursor = self.myDB.cursor()
@@ -61,19 +67,6 @@ class database:
         else:
             print("Invalid server")
 
-    def retrieveCreds(self):
-        self.serverINFO = dict()
-        if self.server == 'local':
-            with open(os.path.join(os.getcwd(),'local_creds.yaml'), 'r') as file:
-                    serverINFO = yaml.safe_load(file)
-                    for i in serverINFO:
-                        self.serverINFO[i] = serverINFO[i]
-        elif self.server == 'remote' :
-            with open(os.path.join(os.getcwd(),'remote_creds.yaml'), 'r') as file:
-                    serverINFO = yaml.safe_load(file)
-                    for i in serverINFO:
-                        self.serverINFO[i] = serverINFO[i]
-                        
     # add new entries
     def addNew(self, Sim, ID, Password, CreatedOn):
         try:
@@ -153,10 +146,10 @@ class database:
 
 if __name__ == "__main__":
     # initiate class instance bt providing either local / remote
-    a = database('local')
+    a = database('remote', 'passphrase', 'db_name', 'table_name')
     a.describeTable()
     print(a.getTotalID())
     # a.addNew("CHECK_IN_OUT_records", randint(1, 100), randint(101, 200), randint(201, 300),)
-    a.clearTable()
-    a.disconnect()
+    #### a.clearTable()
+    # a.disconnect()
     # just some commmit

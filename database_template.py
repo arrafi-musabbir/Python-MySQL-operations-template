@@ -35,11 +35,12 @@ class database:
                 self.table_name = self.serverINFO['DB_TABLE']
                 self.db_state = 1
                 self.mycursor = self.myDB.cursor()
-                print("Server connection established successfully")
+                self.db_connection = True
+                print("Remote server connection established successfully")
             except mysql.connector.errors.InterfaceError:
                 self.db_state = 0
                 print("Server connection failed")
-            return self.db_state
+            return self.db_connection
         elif self.server == 'local':
             try:
                 self.myDB = mysql.connector.connect(
@@ -51,11 +52,12 @@ class database:
                 self.table_name = self.serverINFO['DB_TABLE']
                 self.db_state = 1
                 self.mycursor = self.myDB.cursor()
-                print("Server connection established successfully")
+                self.db_connection = True
+                print("Local server connection established successfully")
             except mysql.connector.errors.InterfaceError:
                 self.db_state = 0
                 print("Server connection failed")
-            return self.db_state
+            return self.db_connection
         else:
             print("Invalid server")
 
@@ -94,13 +96,18 @@ class database:
     # terminate connection with database
 
     def disconnect(self):
-        if self.db_connection:
+        if (self.db_connection == True and self.server == 'local'):
             self.myDB.disconnect()
+            print('Server disconnection protocol is successful')
+        else:
+            self.tunnel.close()
+            self.myDB.disconnect()
+            print('Server disconnection protocol is successful')
 
     # clear said table
 
-    def clearTable(self, tableName):
-        self.mycursor.execute("TRUNCATE TABLE {}".format(tableName))
+    def clearTable(self):
+        self.mycursor.execute("TRUNCATE TABLE {}".format(self.table_name))
         self.myDB.commit()
         print("The table has been cleared")
 
@@ -110,7 +117,7 @@ class database:
             try:
                 for i in range(n):
                     self.mycursor.execute(
-                        "DELETE FROM deviceid ORDER BY CreatedOn DESC LIMIT 1")
+                        "DELETE FROM {} ORDER BY CreatedOn DESC LIMIT 1".format(self.table_name))
                 self.myDB.commit()
                 print(n, "number of entries deletation succcessfull")
             except AttributeError:
@@ -124,7 +131,7 @@ class database:
         try:
             # self.mycursor.execute(
             #     "SELECT Serial FROM deviceid ORDER BY CreatedOn DESC LIMIT 1")
-            self.mycursor.execute("SELECT * FROM deviceid")
+            self.mycursor.execute("SELECT * FROM {}".format(self.table_name))
             self.mycursor.fetchall()
             return len(self.mycursor.fetchall())
         except:
@@ -148,6 +155,8 @@ if __name__ == "__main__":
     # initiate class instance bt providing either local / remote
     a = database('local')
     a.describeTable()
+    print(a.getTotalID())
     # a.addNew("CHECK_IN_OUT_records", randint(1, 100), randint(101, 200), randint(201, 300),)
+    a.clearTable()
     a.disconnect()
     # just some commmit
